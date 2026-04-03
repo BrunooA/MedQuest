@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-
-// IMPORTS DAS TELAS
-import '../exames/exames_screen.dart';
+import '../consultas/widgets/consultas_exames_screen.dart';
 import '../chat/chat_screen.dart';
 import '../perfil/perfil_screen.dart';
-import '../checkin/checkin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,142 +13,179 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomeContent(),
-    const ExamesScreen(),
-    const ChatScreen(),
-    const PerfilScreen(),
-  ];
+  void _mudarPagina(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_currentIndex],
+    // Definimos as páginas que serão exibidas em cada aba
+    final List<Widget> _pages = [
+      HomeContent(onAgendarClick: () => _mudarPagina(1)), // Conteúdo da Home
+      const ConsultasExamesScreen(), // Tela de Exames
+      ChatScreen(onBackToHome: () => _mudarPagina(0)), // Tela de Chat
+      const PerfilScreen(), // Tela de Perfil
+    ];
 
+    return Scaffold(
+      body: IndexedStack(
+        // IndexedStack mantém o estado das páginas ao trocar de aba
+        index: _currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: _mudarPagina,
+        type: BottomNavigationBarType
+            .fixed, // Mantém os itens fixos (sem animação de shift)
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.description),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.description_outlined),
+            activeIcon: Icon(Icons.description),
             label: 'Exames',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat_bubble),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
         ],
       ),
     );
   }
 }
 
-// 👇 CONTEÚDO DA HOME
+// --- CONTEÚDO DA HOME ---
 class HomeContent extends StatefulWidget {
-  const HomeContent({super.key});
+  final VoidCallback onAgendarClick; // Callback para agendar consulta
+  const HomeContent({super.key, required this.onAgendarClick});
 
   @override
   State<HomeContent> createState() => _HomeContentState();
 }
 
 class _HomeContentState extends State<HomeContent> {
-  bool showMedicamentos = false;
+  bool showMedicamentos = false; // Controla a exibição da seção de medicamentos
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
-
+      backgroundColor: const Color(0xFFF5F7FB), // Cor de fundo suave
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Column(
           children: [
+            // --- HEADER AZUL ---
+            // --- HEADER AZUL (Logo na Direita) ---
+            // --- HEADER AZUL ATUALIZADO (Logo Maior na Direita) ---
             Container(
               width: double.infinity,
+              //SafeArea manual via padding superior
               padding: const EdgeInsets.only(
-                top: 50,
+                top: 60,
                 left: 20,
                 right: 20,
-                bottom: 20,
+                bottom: 30,
               ),
               decoration: const BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
                 ),
               ),
               child: Row(
+                // spaceBetween empurra o texto para a esquerda e a logo para a direita
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // center alinha o texto e a logo pelo meio da linha
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // 1. TEXTO DE BOAS-VINDAS (ESQUERDA)
                   Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
                         'Bem-vindo,',
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
                       ),
-                      SizedBox(height: 5),
                       Text(
                         'Bruno 👋',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
 
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 70,
-                    width: 70,
-                    fit: BoxFit.contain,
+                  // 2. LOGO NO CANTO DIREITO (Aumentada)
+                  // Envolvi em um Padding para não ficar colado na borda direita
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      right: 5,
+                    ), // Respiro da borda
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      height: 65, // <-- AUMENTADA PARA 65 (estava 40)
+                      fit: BoxFit.contain, // Garante que a imagem não distorça
+                      // Exibe um ícone médico como backup se a logo sumir
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.medical_services_outlined,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
 
-            _statusCard(),
-            const SizedBox(height: 15),
+            // --- SEÇÃO DE CONTEÚDO (CARDS E BOTÕES) ---
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _statusCard(), // Card de status do dia
+                  const SizedBox(height: 15),
+                  _graficoCard(), // Card do gráfico (placeholder)
+                  const SizedBox(height: 20),
 
-            _graficoCard(),
-            const SizedBox(height: 20),
+                  // Botão de Check-in Diário
+                  _buildButton(
+                    title: 'Check-in diário',
+                    icon: Icons.check_circle_outline,
+                    onTap: () => Navigator.pushNamed(context, '/checkin'),
+                  ),
+                  const SizedBox(height: 10),
 
-            _buildButton(
-              title: 'Check-in diário',
-              icon: Icons.check_circle,
-              onTap: () {
-                Navigator.pushNamed(context, '/checkin');
-              },
-            ),
+                  _medicamentosCard(), // Card expansível de medicamentos
+                  const SizedBox(height: 10),
 
-            const SizedBox(height: 10),
-
-            _medicamentosCard(),
-
-            const SizedBox(height: 10),
-
-            _buildButton(
-              title: 'Testar alarme',
-              icon: Icons.alarm,
-              onTap: () {
-                Navigator.pushNamed(context, '/alarme');
-              },
-            ),
-
-            const SizedBox(height: 10),
-
-            _buildButton(
-              title: 'Agendar consultas',
-              icon: Icons.calendar_month,
-              onTap: () {},
+                  // Botão de Agendar Consultas
+                  _buildButton(
+                    title: 'Agendar consultas',
+                    icon: Icons.calendar_today_outlined,
+                    onTap:
+                        widget.onAgendarClick, // Aciona callback do HomeScreen
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -159,208 +193,150 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // ================= STATUS =================
+  // --- WIDGETS AUXILIARES (CARDS E BOTÕES) ---
 
+  // Card de status simples
   Widget _statusCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+        // Gradiente conforme design do Figma
         gradient: const LinearGradient(
-          colors: [Color(0xFF4A90E2), Color(0xFF50E3C2)],
+          colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: const Color(0xFF00f2fe).withOpacity(0.3),
             blurRadius: 10,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Seu status hoje: Normal 😊',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            'Último check-in: Ontem',
-            style: TextStyle(color: Colors.white70),
-          ),
-        ],
+      child: const Text(
+        'Seu status hoje: Normal 😊',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  // ================= GRÁFICO =================
-
+  // Placeholder para o gráfico
   Widget _graficoCard() {
     return Container(
       height: 180,
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Seu progresso semanal',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                _Bar(80, 'Seg'),
-                _Bar(50, 'Ter'),
-                _Bar(70, 'Qua'),
-                _Bar(30, 'Qui'),
-                _Bar(90, 'Sex'),
-                _Bar(60, 'Sáb'),
-                _Bar(40, 'Dom'),
-              ],
-            ),
-          ),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
         ],
+      ),
+      child: const Center(
+        child: Text(
+          "Gráfico de Progresso Semanal",
+          style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }
 
-  // ================= BOTÕES =================
-
+  // Widget genérico para botões de ação (Check-in, Agendar)
   Widget _buildButton({
     required String title,
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, 1),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.blue),
-            const SizedBox(width: 12),
-            Text(title, style: const TextStyle(fontSize: 16)),
+            Icon(icon, color: Colors.blue, size: 22),
+            const SizedBox(width: 14),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
             const Spacer(),
-            const Icon(Icons.arrow_forward_ios, size: 16),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           ],
         ),
       ),
     );
   }
 
-  // ================= MEDICAMENTOS =================
-
+  // Card expansível para medicamentos
   Widget _medicamentosCard() {
     return Column(
       children: [
         _buildButton(
           title: 'Medicamentos',
-          icon: Icons.medication,
-          onTap: () {
-            setState(() {
-              showMedicamentos = !showMedicamentos;
-            });
-          },
+          icon: Icons.medication_outlined,
+          // Alterna a exibição da lista
+          onTap: () => setState(() => showMedicamentos = !showMedicamentos),
         ),
-
-        AnimatedCrossFade(
-          duration: const Duration(milliseconds: 300),
-          crossFadeState: showMedicamentos
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          firstChild: Container(
-            width: double.infinity,
+        if (showMedicamentos) // Exibe a lista se showMedicamentos for true
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
             margin: const EdgeInsets.only(top: 8),
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(color: Colors.black12, blurRadius: 4),
-              ],
+              border: Border.all(color: Colors.grey.shade200),
             ),
-            child: const Column(
-              children: [
-                _MedicamentoItem('Dipirona', '08:00'),
-                _MedicamentoItem('Vitamina C', '12:00'),
-                _MedicamentoItem('Paracetamol', '20:00'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  "Próximas doses:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "💊 Dipirona (500mg) - 08:00",
+                  style: TextStyle(color: Colors.black54),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  "💊 Vitamina C (1g) - 12:00",
+                  style: TextStyle(color: Colors.black54),
+                ),
               ],
             ),
           ),
-          secondChild: const SizedBox(),
-        ),
       ],
-    );
-  }
-}
-
-// ================= BARRA DO GRÁFICO =================
-
-class _Bar extends StatelessWidget {
-  final double value;
-  final String label;
-
-  const _Bar(this.value, this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: 12,
-              height: value,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 5),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
-    );
-  }
-}
-
-// ================= MEDICAMENTO =================
-
-class _MedicamentoItem extends StatelessWidget {
-  final String nome;
-  final String hora;
-
-  const _MedicamentoItem(this.nome, this.hora);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.circle, size: 8, color: Colors.blue),
-      title: Text(nome),
-      trailing: Text(hora),
     );
   }
 }
