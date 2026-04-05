@@ -15,9 +15,7 @@ class _AlarmeScreenState extends State<AlarmeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Alarme de Medicamento'),
-      ),
+      appBar: AppBar(title: const Text('Alarme de Medicamento')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -105,8 +103,7 @@ class _AlarmeScreenState extends State<AlarmeScreen> {
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                            'Alarme agendado! Pode sair do app 😎'),
+                        content: Text('Alarme agendado! Pode sair do app 😎'),
                       ),
                     );
 

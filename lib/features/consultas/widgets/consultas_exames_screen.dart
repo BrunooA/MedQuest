@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dados_temporarios.dart';
+import 'nova_consulta_screen.dart';
+import 'novo_exame_screen.dart';
 
 class ConsultasExamesScreen extends StatefulWidget {
   const ConsultasExamesScreen({super.key});
@@ -8,69 +11,8 @@ class ConsultasExamesScreen extends StatefulWidget {
 }
 
 class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
-  // Controle da aba ativa: true = Consultas, false = Exames
-  bool abaConsultasAtiva = true; 
-  final TextEditingController _searchController = TextEditingController();
-
-  // --- OVERLAYS DO FIGMA (Idêntico às suas imagens) ---
-
-  void _mostrarOverlayDetalhes() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Detalhes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 15),
-              _itemOverlay(Icons.person, "Dr. João Silva"),
-              _itemOverlay(Icons.medical_services_outlined, "Clínico Geral"),
-              _itemOverlay(Icons.calendar_today, "Hoje • 14:30"),
-              _itemOverlay(Icons.location_on, "Online"),
-              const Divider(height: 25),
-              const Text("📝 Motivo da consulta:\n\"Estou com dores de cabeça frequentes há 3 dias...\"", textAlign: TextAlign.center),
-              const SizedBox(height: 15),
-              _botaoOverlayFechar(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _mostrarOverlayResumo() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Resumo da Consulta", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 15),
-              _itemOverlay(Icons.person, "Dra. Ana Costa"),
-              _itemOverlay(Icons.medical_services_outlined, "Dermatologista"),
-              _itemOverlay(Icons.calendar_today, "10/03 • 09:00"),
-              const Divider(height: 25),
-              const Text("📄 Resumo: Paciente apresentou irritação na pele...", textAlign: TextAlign.center),
-              const Text("💊 Prescrição: Pomada X - 2x ao dia", textAlign: TextAlign.center),
-              const SizedBox(height: 15),
-              _botaoOverlayFechar(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- FIM DOS OVERLAYS ---
+  // AQUI ESTÁ A CORREÇÃO: O nome deve ser exatamente abaConsultas
+  bool abaConsultas = true;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +20,7 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
       backgroundColor: const Color(0xFFF5F7FB),
       body: Column(
         children: [
-          // 1. CABEÇALHO AZUL (Dinâmico conforme Figma)
+          // Cabeçalho Azul
           Container(
             width: double.infinity,
             color: const Color(0xFF3498DB),
@@ -86,11 +28,15 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(onTap: () => Navigator.pop(context), child: const Icon(Icons.arrow_back, color: Colors.white)),
+                const Icon(Icons.arrow_back, color: Colors.white),
                 const SizedBox(height: 15),
                 Text(
-                  abaConsultasAtiva ? "Você tem 1 consulta hoje" : "Seus exames estão dentro do normal.\nContinue cuidando da sua saúde 💚",
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  abaConsultas ? "Minhas Consultas" : "Meus Exames",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -101,20 +47,12 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // 2. BUSCA
-                  _buildSearch(),
-                  const SizedBox(height: 15),
-
-                  // 3. SELETOR DE ABAS [Consultas | Exames]
-                  _buildSeletor(),
-                  const SizedBox(height: 15),
-
-                  // 4. BOTÃO ADICIONAR
-                  _buildAddButton(),
+                  _buildSeletorAbas(),
+                  const SizedBox(height: 20),
+                  _buildBotaoAdicionar(),
                   const SizedBox(height: 25),
-
-                  // 5. CONTEÚDO CORRIGIDO (Fiel ao seu Figma agora)
-                  abaConsultasAtiva ? _listaConsultasHistorico() : _listaExamesCards(),
+                  // Chamada das listas baseada na variável abaConsultas
+                  abaConsultas ? _listaConsultas() : _listaExames(),
                 ],
               ),
             ),
@@ -124,145 +62,239 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
     );
   }
 
-  // --- COMPONENTES AUXILIARES ---
-
-  Widget _buildSearch() {
+  Widget _buildSeletorAbas() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(color: const Color(0xFFE0E0E0), borderRadius: BorderRadius.circular(15)),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          icon: const Icon(Icons.search, color: Colors.black54),
-          hintText: abaConsultasAtiva ? "Buscar Consultas..." : "Buscar Exames...",
-          border: InputBorder.none,
-        ),
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.withOpacity(0.2)),
       ),
-    );
-  }
-
-  Widget _buildSeletor() {
-    return Container(
-      height: 45,
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.blue.withOpacity(0.3))),
       child: Row(
         children: [
-          _tabItem("Consultas", abaConsultasAtiva, () => setState(() { abaConsultasAtiva = true; _searchController.clear(); })),
-          _tabItem("Exames", !abaConsultasAtiva, () => setState(() { abaConsultasAtiva = false; _searchController.clear(); })),
+          _abaItem(
+            "Consultas",
+            abaConsultas,
+            () => setState(() => abaConsultas = true),
+          ),
+          _abaItem(
+            "Exames",
+            !abaConsultas,
+            () => setState(() => abaConsultas = false),
+          ),
         ],
       ),
     );
   }
 
-  Widget _tabItem(String label, bool active, VoidCallback onTap) => Expanded(
+  Widget _abaItem(String label, bool ativa, VoidCallback onTap) => Expanded(
     child: GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(color: active ? const Color(0xFF3498DB) : Colors.transparent, borderRadius: BorderRadius.circular(8)),
-        child: Center(child: Text(label, style: TextStyle(color: active ? Colors.white : Colors.blue, fontWeight: FontWeight.bold))),
+        decoration: BoxDecoration(
+          color: ativa ? const Color(0xFF3498DB) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: ativa ? Colors.white : Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     ),
   );
 
-  Widget _buildAddButton() => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.grey.withOpacity(0.2))),
-    child: Row(children: [const Icon(Icons.add_circle, color: Color(0xFF3498DB), size: 30), const SizedBox(width: 10), Text(abaConsultasAtiva ? "Agendar Consultas" : "Agendar Exames", style: const TextStyle(fontWeight: FontWeight.bold))]),
-  );
-
-  // --- LISTAS DE CONTEÚDO (A CORREÇÃO ESTÁ AQUI) ---
-
-  // ABA CONSULTAS: Agora mostra a lista simples (Histórico)
-  Widget _listaConsultasHistorico() {
-    return Container(
+  Widget _buildBotaoAdicionar() => GestureDetector(
+    onTap: () async {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => abaConsultas
+              ? const NovaConsultaScreen()
+              : const NovoExameScreen(),
+        ),
+      );
+      setState(() {});
+    },
+    child: Container(
       padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child: Column(
-        children: [
-          _itemListaSimples("Hemograma", "10/03/2026"),
-          _divider(),
-          _itemListaSimples("Glicose", "05/03/2026"),
-          _divider(),
-          _itemListaSimples("Colesterol", "20/02/2026"),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
         ],
       ),
-    );
-  }
+      child: Row(
+        children: [
+          const Icon(Icons.add_circle, color: Color(0xFF3498DB), size: 28),
+          const SizedBox(width: 12),
+          Text(
+            abaConsultas ? "Agendar Consulta" : "Agendar Exame",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    ),
+  );
 
-  // ABA EXAMES: Agora mostra os Cards detalhados (Dr. João, Dr. Carlos...)
-  Widget _listaExamesCards() {
+  Widget _listaConsultas() {
     return Column(
-      children: [
-        _cardExameDetalhado(
-          nome: "Dr. João Silva",
-          cargo: "Clínico Geral",
-          data: "Hoje • 14:30",
-          local: "Online",
-          status: "Agendada",
-          corStatus: Colors.yellow[700]!,
-          botoes: [
-            _botaoVerde("Entrar", () {}),
-            const SizedBox(width: 10),
-            _botaoVerde("Ver Detalhes", _mostrarOverlayDetalhes), // Interação OK
-          ],
-        ),
-        _cardExameDetalhado(
-          nome: "Dr. Carlos Lima",
-          cargo: "Cardiologista",
-          data: "05/03/2026 • 16:00",
-          local: "Presencial",
-          status: "Cancelada",
-          corStatus: Colors.red,
-          botoes: [_botaoVerde("Reagendar", () {})],
-        ),
-        _cardExameDetalhado(
-          nome: "Dra. Ana Costa",
-          cargo: "Dermatologista",
-          data: "10/03 • 09:00",
-          local: "Presencial",
-          status: "Concluída",
-          corStatus: Colors.green,
-          botoes: [
-            _botaoVerde("Resumo", _mostrarOverlayResumo), // Interação OK
-            const SizedBox(width: 10),
-            _botaoVerde("Reagendar", () {}),
-          ],
-        ),
-      ],
+      children: listaConsultasCadastradas.reversed.map((c) {
+        bool ehVideo = c['tipoAtendimento'] == "Vídeo";
+        return _cardItem(
+          titulo: c['nome'],
+          subtitulo: "${c['especialidade']} • ${c['local']}",
+          onEntrar: ehVideo ? () {} : null,
+          onDetalhes: () => _mostrarOverlayDetalhes(c),
+        );
+      }).toList(),
     );
   }
 
-  // --- WIDGETS DE DESIGN (Idêntico ao Figma) ---
+  Widget _listaExames() {
+    return Column(
+      children: listaExamesCadastrados
+          .map(
+            (e) => Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: ListTile(
+                title: Text(
+                  e['titulo']!,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(e['data']!),
+                trailing: const Icon(Icons.check_circle, color: Colors.green),
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
 
-  Widget _itemListaSimples(String titulo, String data) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Row(children: [const Icon(Icons.calendar_today, size: 14, color: Colors.blue), const SizedBox(width: 10), Text(data)]), const Text("Normal", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))]);
-
-  Widget _divider() => const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(height: 1));
-
-  Widget _cardExameDetalhado({required String nome, required String cargo, required String data, required String local, required String status, required Color corStatus, required List<Widget> botoes}) {
+  Widget _cardItem({
+    required String titulo,
+    required String subtitulo,
+    required VoidCallback? onEntrar,
+    required VoidCallback onDetalhes,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [Container(width: 50, height: 50, decoration: BoxDecoration(color: Colors.blue[400], borderRadius: BorderRadius.circular(10))), const SizedBox(width: 15), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Text(cargo, style: const TextStyle(color: Colors.grey))])]),
+          Text(
+            titulo,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          ),
+          Text(subtitulo, style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 15),
-          _rowIcon(Icons.calendar_today_outlined, data),
-          _rowIcon(Icons.location_on_outlined, local, color: Colors.red[300]!),
-          _rowIcon(Icons.circle, status, color: corStatus, size: 12),
-          const SizedBox(height: 20),
-          Row(children: botoes),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: onEntrar != null
+                        ? const Color(0xFF2ECC71)
+                        : Colors.grey[300],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: onEntrar,
+                  child: const Text(
+                    "Entrar",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF2ECC71)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: onDetalhes,
+                  child: const Text(
+                    "Detalhes",
+                    style: TextStyle(color: Color(0xFF2ECC71)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _rowIcon(IconData icon, String text, {Color color = Colors.blue, double size = 18}) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [Icon(icon, size: size, color: color), const SizedBox(width: 10), Text(text)]));
+  void _mostrarOverlayDetalhes(Map<String, dynamic> c) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: Padding(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Detalhes",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              _linhaDetalhe(Icons.person, c['nome']),
+              _linhaDetalhe(Icons.medical_services, c['especialidade']),
+              _linhaDetalhe(Icons.calendar_today, c['data']),
+              _linhaDetalhe(Icons.location_on, c['local']),
+              const SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2ECC71),
+                    shape: const StadiumBorder(),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Fechar",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-  Widget _itemOverlay(IconData icon, String text) => Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [Icon(icon, color: Colors.blue, size: 20), const SizedBox(width: 10), Text(text)]));
-
-  Widget _botaoVerde(String label, VoidCallback onTap) => Expanded(child: InkWell(onTap: onTap, child: Container(padding: const EdgeInsets.symmetric(vertical: 10), decoration: BoxDecoration(color: const Color(0xFF2ECC71), borderRadius: BorderRadius.circular(10)), child: Center(child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))))));
-
-  Widget _botaoOverlayFechar() => ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2ECC71)), child: const Text("Fechar", style: TextStyle(color: Colors.white)));
+  Widget _linhaDetalhe(IconData icon, String texto) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      children: [
+        Icon(icon, color: Colors.blue, size: 22),
+        const SizedBox(width: 15),
+        Text(texto, style: const TextStyle(fontSize: 16)),
+      ],
+    ),
+  );
 }

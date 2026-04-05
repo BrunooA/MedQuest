@@ -1,110 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../user_controller.dart';
+import '../figma_styles.dart';
 
 class Etapa1Dados extends StatefulWidget {
-  final VoidCallback onNext; 
+  final VoidCallback onNext;
   const Etapa1Dados({super.key, required this.onNext});
 
   @override
   State<Etapa1Dados> createState() => _Etapa1DadosState();
 }
 
-// ESTA É A PARTE QUE ESTAVA FALTANDO NO SEU CÓDIGO:
 class _Etapa1DadosState extends State<Etapa1Dados> {
-  // Controladores para capturar o texto
-  final TextEditingController _nomeController = TextEditingController(text: "Irina S. Borges");
-  final TextEditingController _emailController = TextEditingController(text: "irina.silva.borges@teste.com");
+  final _telCont = TextEditingController();
+
+  // Função para formatar telefone: +55 (27) 99999-9999
+  void _formatarTelefone(String valor) {
+    String numeros = valor.replaceAll(RegExp(r'\D'), '');
+    if (numeros.length > 11) numeros = numeros.substring(0, 11);
+    
+    String formatado = "+55 ";
+    if (numeros.length >= 2) {
+      formatado += "(${numeros.substring(0, 2)}) ";
+      if (numeros.length > 2) {
+        if (numeros.length <= 7) {
+          formatado += numeros.substring(2);
+        } else {
+          formatado += "${numeros.substring(2, 7)}-${numeros.substring(7)}";
+        }
+      }
+    } else {
+      formatado += numeros;
+    }
+
+    _telCont.value = TextEditingValue(
+      text: formatado,
+      selection: TextSelection.collapsed(offset: formatado.length),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF3498DB), 
-        elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.white),
-        title: const Text("Dados Pessoais", style: TextStyle(color: Colors.white, fontSize: 18)),
-        
-        // CORREÇÃO AQUI: centerTitle fica fora do actions
-        centerTitle: false, 
-        
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 20, top: 20),
-            child: Text("1 \\ 4", style: TextStyle(color: Colors.white70)),
-          )
-        ],
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(25),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Círculo de Avatar do Figma
-            Center(
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFC0CB), // Rosa claro do seu print
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.person, size: 60, color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            _label("Nome Completo"),
-            _input(_nomeController, "Digite seu nome"),
-
-            const SizedBox(height: 15),
-
-            _label("Digite seu e-mail"),
-            _input(_emailController, "email@exemplo.com"),
-
-            const SizedBox(height: 15),
-
-            _label("Data de Nascimento"),
-            _input(TextEditingController(text: "17/03/1998"), "DD/MM/AAAA"),
-
-            const SizedBox(height: 40),
-
-            // Botão Próximo
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2ECC71), // Verde do Figma
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: widget.onNext, // <--- CHAMA A FUNÇÃO DO PAI (FLUXO)
-                child: const Text("Próximo", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            figmaHeader("Dados Pessoais", "1 \\ 4", 0.25),
+            Padding(
+              padding: const EdgeInsets.all(25.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: CircleAvatar(radius: 45, backgroundColor: Color(0xFFFFC0CB), child: Icon(Icons.person, size: 50, color: Colors.white)),
+                  ),
+                  const Align(alignment: Alignment.centerRight, child: Icon(Icons.lock_outline, color: Colors.orange, size: 20)),
+                  
+                  figmaLabel("Nome Completo (Gov.br)"),
+                  TextField(controller: TextEditingController(text: userController.nome), readOnly: true, decoration: figmaInputDecoration.copyWith(filled: true, fillColor: Colors.grey[100])),
+                  
+                  figmaLabel("E-mail"),
+                  TextField(controller: TextEditingController(text: userController.email), readOnly: true, decoration: figmaInputDecoration.copyWith(filled: true, fillColor: Colors.grey[100])),
+                  
+                  figmaLabel("Número de Telefone"),
+                  TextField(
+                    controller: _telCont,
+                    keyboardType: TextInputType.phone,
+                    onChanged: _formatarTelefone,
+                    decoration: figmaInputDecoration.copyWith(hintText: "+55 (27) 99999-9999"),
+                  ),
+                  
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity, height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: colorFigmaGreen, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      onPressed: widget.onNext,
+                      child: const Text("Próximo", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Widgets auxiliares para manter o código limpo
-  Widget _label(String texto) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(texto, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-    );
-  }
-
-  Widget _input(TextEditingController controller, String hint) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: const Color(0xFFF0F0F0),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
         ),
       ),
     );

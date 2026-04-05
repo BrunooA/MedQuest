@@ -12,35 +12,27 @@ class FluxoCadastroScreen extends StatefulWidget {
 }
 
 class _FluxoCadastroScreenState extends State<FluxoCadastroScreen> {
-  // O controlador que faz a mágica de mudar de página
   final PageController _pageController = PageController();
 
   void _proximaEtapa() {
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
-    );
+    _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
   }
 
-  void _voltarEtapa() {
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
-    );
+  void _etapaAnterior() {
+    _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // O PageView segura suas 4 telas
       body: PageView(
         controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // Travamos o arrasto manual
+        physics: const NeverScrollableScrollPhysics(),
         children: [
           Etapa1Dados(onNext: _proximaEtapa),
-          Etapa2Saude(onNext: _proximaEtapa, onBack: _voltarEtapa),
-          Etapa3Medicacoes(onNext: _proximaEtapa, onBack: _voltarEtapa),
-          Etapa4Emergencia(onBack: _voltarEtapa),
+          Etapa2Saude(onNext: _proximaEtapa, onBack: _etapaAnterior), // Adicionado onBack aqui
+          Etapa3Medicacoes(onNext: _proximaEtapa, onBack: _etapaAnterior),
+          Etapa4Emergencia(onBack: _etapaAnterior),
         ],
       ),
     );

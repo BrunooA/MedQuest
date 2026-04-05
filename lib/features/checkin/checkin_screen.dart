@@ -34,9 +34,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Check-in diário'),
-      ),
+      appBar: AppBar(title: const Text('Check-in diário')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -71,7 +69,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                                   : Colors.grey,
                             ),
                             if (humorSelecionado == index)
-                              const Icon(Icons.check, size: 16)
+                              const Icon(Icons.check, size: 16),
                           ],
                         ),
                       );
@@ -98,8 +96,9 @@ class _CheckinScreenState extends State<CheckinScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: sintomas.map((sintoma) {
-                      final selecionado =
-                          sintomasSelecionados.contains(sintoma);
+                      final selecionado = sintomasSelecionados.contains(
+                        sintoma,
+                      );
 
                       return GestureDetector(
                         onTap: () {
@@ -113,7 +112,9 @@ class _CheckinScreenState extends State<CheckinScreen> {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: selecionado
                                 ? Colors.blue
@@ -133,9 +134,12 @@ class _CheckinScreenState extends State<CheckinScreen> {
                               ),
                               if (selecionado) ...[
                                 const SizedBox(width: 5),
-                                const Icon(Icons.check,
-                                    size: 16, color: Colors.white)
-                              ]
+                                const Icon(
+                                  Icons.check,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -208,10 +212,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            blurRadius: 5,
-            color: Colors.black.withOpacity(0.05),
-          )
+          BoxShadow(blurRadius: 5, color: Colors.black.withOpacity(0.05)),
         ],
       ),
       child: child,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../user_controller.dart';
+import '../figma_styles.dart';
 
 class Etapa3Medicacoes extends StatefulWidget {
   final VoidCallback onNext;
@@ -10,106 +12,90 @@ class Etapa3Medicacoes extends StatefulWidget {
 }
 
 class _Etapa3MedicacoesState extends State<Etapa3Medicacoes> {
-  // Lista simulada baseada no seu Figma
-  final List<Map<String, String>> medicamentos = [
-    {"nome": "Dipirona", "horario": "08:00 • 20:00"},
-    {"nome": "Ibuprofeno", "horario": "08:00 • 20:00"},
-    {"nome": "Torcilax", "horario": "08:00 • 20:00"},
-  ];
+  List<Map<String, String>> medicamentos = List.from(userController.medicamentos);
+
+  void _abrirDialogo({int? index}) {
+    TextEditingController n = TextEditingController(
+      text: index != null ? medicamentos[index]['nome'] : ""
+    );
+    
+    showDialog(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(index == null ? "Adicionar Remédio" : "Editar Remédio"),
+        content: TextField(
+          controller: n, 
+          decoration: const InputDecoration(hintText: "Nome do medicamento"),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text("Cancelar")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2ECC71)),
+            onPressed: () {
+              if (n.text.trim().isEmpty) return; 
+              setState(() {
+                if (index == null) {
+                  medicamentos.add({"nome": n.text, "horario": "08:00 - 20:00"});
+                } else {
+                  medicamentos[index]['nome'] = n.text;
+                }
+              });
+              Navigator.pop(c);
+            }, 
+            child: const Text("Salvar", style: TextStyle(color: Colors.white)),
+          )
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF3498DB),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: widget.onBack,
-        ),
-        title: const Text("Medicações", style: TextStyle(color: Colors.white)),
-        centerTitle: false,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 20, top: 20),
-            child: Text("3 \\ 4", style: TextStyle(color: Colors.white70)),
-          )
-        ],
-      ),
       body: Column(
         children: [
+          Stack(
+            children: [
+              figmaHeader("Medicações", "3 \\ 4", 0.75),
+              Positioned(top: 40, left: 10, child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: widget.onBack,
+              )),
+            ],
+          ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(25),
               children: [
-                _buildAddCard(),
-                const SizedBox(height: 15),
-                ...medicamentos.map((med) => _buildMedCard(med['nome']!, med['horario']!)).toList(),
+                InkWell(onTap: () => _abrirDialogo(), child: _buildAddCard()),
+                ...medicamentos.asMap().entries.map((e) => InkWell(
+                  onTap: () => _abrirDialogo(index: e.key),
+                  child: _buildMedCard(e.value['nome']!, e.value['horario']!),
+                )).toList(),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2ECC71),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: widget.onNext,
-                child: const Text("Próximo", style: TextStyle(color: Colors.white)),
-              ),
-            ),
-          ),
+          _buildRodape(),
         ],
       ),
     );
   }
 
-  Widget _buildAddCard() {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
-      child: Row(
+  Widget _buildRodape() {
+    return Padding(
+      padding: const EdgeInsets.all(25),
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.medication, color: Colors.blue),
-          ),
-          const SizedBox(width: 15),
-          const Text("Adicionar Medicações", style: TextStyle(fontWeight: FontWeight.bold)),
+          Row(children: [
+            Expanded(child: ElevatedButton(onPressed: () => setState(() => medicamentos.clear()), child: const Text("Limpar"))),
+            const SizedBox(width: 10),
+            Expanded(child: ElevatedButton(onPressed: widget.onNext, child: const Text("Próximo"))),
+          ]),
         ],
       ),
     );
   }
 
-  Widget _buildMedCard(String nome, String horario) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
-      child: Row(
-        children: [
-          const Icon(Icons.medical_services, color: Colors.blue),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today, size: 12, color: Colors.blue),
-                  const SizedBox(width: 5),
-                  Text(horario, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildAddCard() => const Card(child: ListTile(leading: Icon(Icons.add), title: Text("Adicionar")));
+  Widget _buildMedCard(String n, String h) => Card(child: ListTile(leading: const Icon(Icons.medication), title: Text(n), subtitle: Text(h)));
 }

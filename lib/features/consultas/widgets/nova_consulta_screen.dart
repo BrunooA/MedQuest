@@ -9,35 +9,16 @@ class NovaConsultaScreen extends StatefulWidget {
 }
 
 class _NovaConsultaScreenState extends State<NovaConsultaScreen> {
-  String? medico;
   String? especialidade;
-  String? horario;
+  String? medico;
+  String tipoAtendimento = "Presencial";
 
-  bool presencial = false;
-  bool video = false;
-  bool chat = false;
-
-  // FUNÇÃO QUE SALVA DE VERDADE NA LISTA GLOBAL
-  void _salvarConsulta() {
-    if (medico == null || especialidade == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Preencha o médico e a especialidade!")),
-      );
-      return;
-    }
-
+  void _aoMudarEspecialidade(String? novaEspec) {
     setState(() {
-      listaConsultasCadastradas.add({
-        "nome": medico!,
-        "especialidade": especialidade!,
-        "data": "Agendado para $horario",
-        "local": presencial ? "Presencial" : "Online",
-        "status": "Agendada",
-        "cor": Colors.orange,
-      });
+      especialidade = novaEspec;
+      List<String> medicos = dadosMedicosPorEspecialidade[novaEspec] ?? [];
+      medico = medicos.length == 1 ? medicos.first : null;
     });
-
-    Navigator.pop(context); // Volta para a lista
   }
 
   @override
@@ -47,7 +28,7 @@ class _NovaConsultaScreenState extends State<NovaConsultaScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF3498DB),
         title: const Text(
-          "Nova consulta",
+          "Agendar Consulta",
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
@@ -60,54 +41,48 @@ class _NovaConsultaScreenState extends State<NovaConsultaScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _label("Especialidade"),
+            _buildDropdown(
+              dadosMedicosPorEspecialidade.keys.toList(),
+              especialidade,
+              _aoMudarEspecialidade,
+            ),
+
             _label("Nome do Médico"),
             _buildDropdown(
-              ["Dra. Anna", "Dr. Marcos", "Dra. Beatriz"],
+              especialidade == null
+                  ? []
+                  : dadosMedicosPorEspecialidade[especialidade]!,
               medico,
               (v) => setState(() => medico = v),
             ),
 
-            _label("Escolha a especialidade"),
-            _buildDropdown(
-              ["Dermatologia", "Cardiologia", "Geral"],
-              especialidade,
-              (v) => setState(() => especialidade = v),
+            _label("Tipo de Atendimento"),
+            Row(
+              children: [
+                _radioBtn("Presencial", Icons.person_outline),
+                const SizedBox(width: 10),
+                _radioBtn("Vídeo", Icons.videocam_outlined),
+              ],
             ),
 
-            _label("Escolha um horário disponível"),
-            _buildDropdown(
-              ["09:00", "10:30", "15:00"],
-              horario,
-              (v) => setState(() => horario = v),
-            ),
-
-            _label("Tipo de atendimento"),
-            _checkItem(
-              "Presencial",
-              presencial,
-              (v) => setState(() => presencial = v!),
-            ),
-            _checkItem("Vídeo", video, (v) => setState(() => video = v!)),
-            _checkItem("Chat", chat, (v) => setState(() => chat = v!)),
-
-            const SizedBox(height: 30),
-            _botaoAgendar(),
+            const SizedBox(height: 40),
+            _botaoConfirmar(),
           ],
         ),
       ),
     );
   }
 
-  // Widgets auxiliares mantidos e organizados
   Widget _label(String t) => Padding(
-    padding: const EdgeInsets.only(top: 15, bottom: 5),
+    padding: const EdgeInsets.only(top: 20, bottom: 8),
     child: Text(t, style: const TextStyle(fontWeight: FontWeight.bold)),
   );
 
   Widget _buildDropdown(
     List<String> itens,
     String? valor,
-    Function(String?) onChange,
+    Function(String?)? onChange,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -120,7 +95,7 @@ class _NovaConsultaScreenState extends State<NovaConsultaScreen> {
         child: DropdownButton<String>(
           isExpanded: true,
           value: valor,
-          hint: const Text("Selecione"),
+          hint: const Text("Selecione..."),
           items: itens
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
@@ -130,23 +105,63 @@ class _NovaConsultaScreenState extends State<NovaConsultaScreen> {
     );
   }
 
-  Widget _checkItem(String t, bool v, Function(bool?) onChange) => Row(
-    children: [
-      Checkbox(value: v, onChanged: onChange),
-      Text(t),
-    ],
+  Widget _radioBtn(String val, IconData icon) => Expanded(
+    child: InkWell(
+      onTap: () => setState(() => tipoAtendimento = val),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: tipoAtendimento == val
+              ? const Color(0xFF3498DB).withOpacity(0.1)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: tipoAtendimento == val
+                ? const Color(0xFF3498DB)
+                : Colors.black12,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: tipoAtendimento == val
+                  ? const Color(0xFF3498DB)
+                  : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Text(val),
+          ],
+        ),
+      ),
+    ),
   );
 
-  Widget _botaoAgendar() => SizedBox(
+  Widget _botaoConfirmar() => SizedBox(
     width: double.infinity,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF2ECC71),
         padding: const EdgeInsets.all(15),
       ),
-      onPressed: _salvarConsulta, // Agora chama a função de salvar
+      onPressed: () {
+        if (medico != null) {
+          listaConsultasCadastradas.add({
+            "nome": medico!,
+            "especialidade": especialidade!,
+            "data": "12/04 • 10:00",
+            "local": tipoAtendimento == "Vídeo" ? "Online" : "Clínica MedQuest",
+            "status": "Agendada",
+            "cor": Colors.orange,
+            "tipoAtendimento": tipoAtendimento,
+          });
+          Navigator.pop(context);
+        }
+      },
       child: const Text(
-        "Agendar",
+        "Confirmar Agendamento",
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     ),

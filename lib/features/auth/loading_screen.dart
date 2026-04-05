@@ -10,7 +10,6 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -60,14 +59,12 @@ class _LoadingScreenState extends State<LoadingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox.expand( // 🔥 GARANTE TELA TODA
+      body: SizedBox.expand(
+        // 🔥 GARANTE TELA TODA
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.blue,
-                Colors.green,
-              ],
+              colors: [Colors.blue, Colors.green],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -77,14 +74,10 @@ class _LoadingScreenState extends State<LoadingScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 // ❤️ LOGO ANIMADA
                 ScaleTransition(
                   scale: _scaleAnimation,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 120,
-                  ),
+                  child: Image.asset('assets/images/logo.png', width: 120),
                 ),
 
                 const SizedBox(height: 30),
@@ -92,10 +85,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                 // 📝 TEXTO DINÂMICO
                 Text(
                   steps[step],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
                 ),
 
                 const SizedBox(height: 10),
@@ -103,10 +93,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                 // 🏥 SUBTEXTO
                 const Text(
                   'Aplicativo para Monitoramento de Saúde',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),

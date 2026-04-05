@@ -120,11 +120,11 @@ class _HomeContentState extends State<HomeContent> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        'Bem-vindo,',
+                        'Bem-vinda,',
                         style: TextStyle(color: Colors.white70, fontSize: 13),
                       ),
                       Text(
-                        'Bruno 👋',
+                        'Irina 👋',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

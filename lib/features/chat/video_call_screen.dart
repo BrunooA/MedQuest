@@ -41,7 +41,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Fundo preto caso a imagem demore a carregar
+      backgroundColor:
+          Colors.black, // Fundo preto caso a imagem demore a carregar
       body: GestureDetector(
         onTap: _alternarControles,
         child: Stack(
@@ -64,7 +65,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
             ),
 
             // 2. GRADIENTE (Figma feel)
-            IgnorePointer( // Impede que o gradiente bloqueie o toque do GestureDetector
+            IgnorePointer(
+              // Impede que o gradiente bloqueie o toque do GestureDetector
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -92,13 +94,20 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                     children: [
                       const Icon(Icons.circle, color: Colors.green, size: 10),
                       const SizedBox(width: 8),
-                      const Text("Em chamada", style: TextStyle(color: Colors.white, fontSize: 14)),
+                      const Text(
+                        "Em chamada",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     "Dra. Anna Silva",
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text(
                     "Clínico Geral",
@@ -117,10 +126,15 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 height: 140,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.4),
+                    width: 1.5,
+                  ),
                   boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 10)],
                   image: const DecorationImage(
-                    image: NetworkImage("https://www.w3schools.com/howto/img_avatar.png"),
+                    image: NetworkImage(
+                      "https://www.w3schools.com/howto/img_avatar.png",
+                    ),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -143,8 +157,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(icon: const Icon(Icons.videocam_outlined), onPressed: () {}),
-                    IconButton(icon: const Icon(Icons.mic_none_outlined), onPressed: () {}),
+                    IconButton(
+                      icon: const Icon(Icons.videocam_outlined),
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.mic_none_outlined),
+                      onPressed: () {},
+                    ),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: const CircleAvatar(
