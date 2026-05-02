@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../user_controller.dart';
 import '../figma_styles.dart';
 
@@ -18,7 +17,7 @@ class _Etapa1DadosState extends State<Etapa1Dados> {
   void _formatarTelefone(String valor) {
     String numeros = valor.replaceAll(RegExp(r'\D'), '');
     if (numeros.length > 11) numeros = numeros.substring(0, 11);
-    
+
     String formatado = "+55 ";
     if (numeros.length >= 2) {
       formatado += "(${numeros.substring(0, 2)}) ";
@@ -53,31 +52,74 @@ class _Etapa1DadosState extends State<Etapa1Dados> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Center(
-                    child: CircleAvatar(radius: 45, backgroundColor: Color(0xFFFFC0CB), child: Icon(Icons.person, size: 50, color: Colors.white)),
+                    child: CircleAvatar(
+                      radius: 45,
+                      backgroundColor: Color(0xFFFFC0CB),
+                      child: Icon(Icons.person, size: 50, color: Colors.white),
+                    ),
                   ),
-                  const Align(alignment: Alignment.centerRight, child: Icon(Icons.lock_outline, color: Colors.orange, size: 20)),
-                  
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.lock_outline,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                  ),
+
                   figmaLabel("Nome Completo (Gov.br)"),
-                  TextField(controller: TextEditingController(text: userController.nome), readOnly: true, decoration: figmaInputDecoration.copyWith(filled: true, fillColor: Colors.grey[100])),
-                  
+                  TextField(
+                    controller: TextEditingController(
+                      text: userController.nome,
+                    ),
+                    readOnly: true,
+                    decoration: figmaInputDecoration.copyWith(
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                    ),
+                  ),
+
                   figmaLabel("E-mail"),
-                  TextField(controller: TextEditingController(text: userController.email), readOnly: true, decoration: figmaInputDecoration.copyWith(filled: true, fillColor: Colors.grey[100])),
-                  
+                  TextField(
+                    controller: TextEditingController(
+                      text: userController.email,
+                    ),
+                    readOnly: true,
+                    decoration: figmaInputDecoration.copyWith(
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                    ),
+                  ),
+
                   figmaLabel("Número de Telefone"),
                   TextField(
                     controller: _telCont,
                     keyboardType: TextInputType.phone,
                     onChanged: _formatarTelefone,
-                    decoration: figmaInputDecoration.copyWith(hintText: "+55 (27) 99999-9999"),
+                    decoration: figmaInputDecoration.copyWith(
+                      hintText: "+55 (27) 99999-9999",
+                    ),
                   ),
-                  
+
                   const SizedBox(height: 30),
                   SizedBox(
-                    width: double.infinity, height: 50,
+                    width: double.infinity,
+                    height: 50,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: colorFigmaGreen, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorFigmaGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       onPressed: widget.onNext,
-                      child: const Text("Próximo", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        "Próximo",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],

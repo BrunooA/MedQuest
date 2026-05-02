@@ -3,7 +3,6 @@ import 'services/notification_service.dart';
 import 'splash/splash_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/loading_screen.dart';
-import 'features/auth/cadastro_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/checkin/checkin_screen.dart';
 import 'features/consultas/widgets/consultas_exames_screen.dart';
@@ -38,7 +37,6 @@ class MeuApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/loading': (context) => const LoadingScreen(),
-        '/cadastro': (context) => const CadastroScreen(),
         '/home': (context) => const HomeScreen(),
         '/checkin': (context) => const CheckinScreen(),
         '/consultas': (context) => const ConsultasExamesScreen(),
