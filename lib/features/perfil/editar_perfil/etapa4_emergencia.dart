@@ -38,7 +38,7 @@ class _Etapa4EmergenciaState extends State<Etapa4Emergencia> {
                   ),
                   figmaLabel("Relação"),
                   DropdownButtonFormField<String>(
-                    value: _parentesco,
+                    initialValue: _parentesco,
                     items: ["Pai", "Mãe", "Amigo", "Parente", "Cônjuge"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                     onChanged: (v) => setState(() => _parentesco = v),
                     decoration: figmaInputDecoration,

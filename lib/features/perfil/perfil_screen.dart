@@ -111,7 +111,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         border: Border.all(color: const Color(0xFFFFC0CB), width: 4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -208,7 +208,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15),
         ],
       ),
       child: Column(

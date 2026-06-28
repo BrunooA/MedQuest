@@ -71,7 +71,7 @@ class _Etapa3MedicacoesState extends State<Etapa3Medicacoes> {
                 ...medicamentos.asMap().entries.map((e) => InkWell(
                   onTap: () => _abrirDialogo(index: e.key),
                   child: _buildMedCard(e.value['nome']!, e.value['horario']!),
-                )).toList(),
+                ))
               ],
             ),
           ),

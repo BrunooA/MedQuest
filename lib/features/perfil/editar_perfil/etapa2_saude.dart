@@ -88,7 +88,7 @@ class _Etapa2SaudeState extends State<Etapa2Saude> {
                         onPressed: () => setState(() => alergias.remove(al)),
                       ),
                     ),
-                  )).toList(),
+                  ))
                 ],
               ),
             ),

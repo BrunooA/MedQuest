@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dados_temporarios.dart';
 import 'nova_consulta_screen.dart';
 import 'novo_exame_screen.dart';
+import 'package:meu_app/features/chat/video_call_screen.dart'; // Importação absoluta corrigida
 
 class ConsultasExamesScreen extends StatefulWidget {
   const ConsultasExamesScreen({super.key});
@@ -11,8 +12,23 @@ class ConsultasExamesScreen extends StatefulWidget {
 }
 
 class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
-  // AQUI ESTÁ A CORREÇÃO: O nome deve ser exatamente abaConsultas
   bool abaConsultas = true;
+  String queryBusca = "";
+  final TextEditingController _buscaController = TextEditingController();
+
+  // Helper de Cores para o Status conforme o Figma
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case "Agendado":
+        return Colors.amber;
+      case "Cancelada":
+        return Colors.red;
+      case "Concluído":
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +36,7 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
       backgroundColor: const Color(0xFFF5F7FB),
       body: Column(
         children: [
-          // Cabeçalho Azul
+          // Cabeçalho Azul com Campo de Busca Integrado (Fidelidade ao Figma)
           Container(
             width: double.infinity,
             color: const Color(0xFF3498DB),
@@ -38,6 +54,28 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: 15),
+                // Campo de Busca
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: TextField(
+                    controller: _buscaController,
+                    onChanged: (value) {
+                      setState(() {
+                        queryBusca = value.toLowerCase();
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: abaConsultas ? "Buscar Consultas" : "Buscar Exames",
+                      prefixIcon: const Icon(Icons.search, color: Colors.black54),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -51,7 +89,7 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
                   const SizedBox(height: 20),
                   _buildBotaoAdicionar(),
                   const SizedBox(height: 25),
-                  // Chamada das listas baseada na variável abaConsultas
+                  // Chamada das listas filtradas baseada na aba ativa
                   abaConsultas ? _listaConsultas() : _listaExames(),
                 ],
               ),
@@ -68,19 +106,27 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           _abaItem(
             "Consultas",
             abaConsultas,
-            () => setState(() => abaConsultas = true),
+            () => setState(() {
+              abaConsultas = true;
+              _buscaController.clear();
+              queryBusca = "";
+            }),
           ),
           _abaItem(
             "Exames",
             !abaConsultas,
-            () => setState(() => abaConsultas = false),
+            () => setState(() {
+              abaConsultas = false;
+              _buscaController.clear();
+              queryBusca = "";
+            }),
           ),
         ],
       ),
@@ -110,15 +156,24 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
 
   Widget _buildBotaoAdicionar() => GestureDetector(
     onTap: () async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => abaConsultas
-              ? const NovaConsultaScreen()
-              : const NovoExameScreen(),
-        ),
-      );
-      setState(() {});
+      if (abaConsultas) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NovaConsultaScreen()),
+        );
+        setState(() {});
+      } else {
+        // Regra de Negócio: Impede agendar exame se não houver consultas salvas
+        if (listaConsultasCadastradas.isEmpty) {
+          _mostrarAvisoConsultaNecessaria();
+        } else {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NovoExameScreen()),
+          );
+          setState(() {});
+        }
+      }
     },
     child: Container(
       padding: const EdgeInsets.all(15),
@@ -126,7 +181,7 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5),
         ],
       ),
       child: Row(
@@ -142,14 +197,67 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
     ),
   );
 
+  void _mostrarAvisoConsultaNecessaria() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 30),
+            SizedBox(width: 10),
+            Text("Aviso", style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Text(
+          "Para agendar um novo exame, você precisa ter pelo menos uma consulta médica mapeada ou realizada no sistema."
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "Entendido", 
+              style: TextStyle(color: Color(0xFF3498DB), fontWeight: FontWeight.bold)
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _listaConsultas() {
+    // Filtragem em tempo real por nome do médico ou especialidade
+    var filtradas = listaConsultasCadastradas.reversed.where((c) {
+      final nome = c['nome']?.toString().toLowerCase() ?? "";
+      final esp = c['especialidade']?.toString().toLowerCase() ?? "";
+      return nome.contains(queryBusca) || esp.contains(queryBusca);
+    }).toList();
+
+    if (filtradas.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 30),
+        child: Text("Nenhuma consulta encontrada.", style: TextStyle(color: Colors.grey)),
+      );
+    }
+
     return Column(
-      children: listaConsultasCadastradas.reversed.map((c) {
+      children: filtradas.map((c) {
         bool ehVideo = c['tipoAtendimento'] == "Vídeo";
+        String status = c['status'] ?? 'Agendado';
+
         return _cardItem(
           titulo: c['nome'],
           subtitulo: "${c['especialidade']} • ${c['local']}",
-          onEntrar: ehVideo ? () {} : null,
+          status: status,
+          // Se for chamada de vídeo, abre a tela correta. Caso contrário, botão desabilitado
+          onEntrar: ehVideo 
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const VideoCallScreen()),
+                  );
+                }
+              : null,
           onDetalhes: () => _mostrarOverlayDetalhes(c),
         );
       }).toList(),
@@ -157,14 +265,25 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
   }
 
   Widget _listaExames() {
+    // Filtragem de exames por título
+    var filtrados = listaExamesCadastrados.where((e) {
+      final titulo = e['titulo']?.toString().toLowerCase() ?? "";
+      return titulo.contains(queryBusca);
+    }).toList();
+
+    if (filtrados.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 30),
+        child: Text("Nenhum exame encontrado.", style: TextStyle(color: Colors.grey)),
+      );
+    }
+
     return Column(
-      children: listaExamesCadastrados
+      children: filtrados
           .map(
             (e) => Card(
               margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               child: ListTile(
                 title: Text(
                   e['titulo']!,
@@ -182,6 +301,7 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
   Widget _cardItem({
     required String titulo,
     required String subtitulo,
+    required String status,
     required VoidCallback? onEntrar,
     required VoidCallback onDetalhes,
   }) {
@@ -192,15 +312,44 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            titulo,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  titulo, 
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)
+                ),
+              ),
+              // Indicador Visual do Status (Bolinha Colorida do Figma)
+              Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(status),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    status,
+                    style: TextStyle(
+                      color: _getStatusColor(status),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
           Text(subtitulo, style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 15),
@@ -209,18 +358,11 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
               Expanded(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: onEntrar != null
-                        ? const Color(0xFF2ECC71)
-                        : Colors.grey[300],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    backgroundColor: onEntrar != null ? const Color(0xFF2ECC71) : Colors.grey[300],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: onEntrar,
-                  child: const Text(
-                    "Entrar",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: const Text("Entrar", style: TextStyle(color: Colors.white)),
                 ),
               ),
               const SizedBox(width: 10),
@@ -228,15 +370,10 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF2ECC71)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: onDetalhes,
-                  child: const Text(
-                    "Detalhes",
-                    style: TextStyle(color: Color(0xFF2ECC71)),
-                  ),
+                  child: const Text("Detalhes", style: TextStyle(color: Color(0xFF2ECC71))),
                 ),
               ),
             ],
@@ -247,6 +384,8 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
   }
 
   void _mostrarOverlayDetalhes(Map<String, dynamic> c) {
+    final String status = c['status'] ?? 'Agendado';
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -255,17 +394,38 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
           padding: const EdgeInsets.all(25),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Detalhes",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Center(
+                child: Text(
+                  status == "Cancelada" ? "Consulta Cancelada" : "Detalhes",
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
               ),
               const SizedBox(height: 20),
+              
               _linhaDetalhe(Icons.person, c['nome']),
               _linhaDetalhe(Icons.medical_services, c['especialidade']),
               _linhaDetalhe(Icons.calendar_today, c['data']),
               _linhaDetalhe(Icons.location_on, c['local']),
+              
+              // Se possuir o motivo adicionado no mapa de dados, renderiza em formato texto
+              if (c.containsKey('motivo')) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  "📝 Motivo da consulta:", 
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '"${c['motivo']}"', 
+                  style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black87)
+                ),
+              ],
+
               const SizedBox(height: 25),
+              
+              // Botão Dinâmico: Se cancelada vira "Reagendar", se não vira "Fechar"
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -273,10 +433,19 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
                     backgroundColor: const Color(0xFF2ECC71),
                     shape: const StadiumBorder(),
                   ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    "Fechar",
-                    style: TextStyle(color: Colors.white),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    if (status == "Cancelada") {
+                      // Direciona para tela de agendamento caso queira reagendar
+                      Navigator.push(
+                        context, 
+                        MaterialPageRoute(builder: (context) => const NovaConsultaScreen())
+                      );
+                    }
+                  },
+                  child: Text(
+                    status == "Cancelada" ? "Reagendar" : "Fechar",
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -293,7 +462,7 @@ class _ConsultasExamesScreenState extends State<ConsultasExamesScreen> {
       children: [
         Icon(icon, color: Colors.blue, size: 22),
         const SizedBox(width: 15),
-        Text(texto, style: const TextStyle(fontSize: 16)),
+        Expanded(child: Text(texto, style: const TextStyle(fontSize: 16))),
       ],
     ),
   );

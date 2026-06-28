@@ -73,10 +73,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.6),
+                      Colors.black.withValues(alpha: 0.6),
                       Colors.transparent,
                       Colors.transparent,
-                      Colors.black.withOpacity(0.5),
+                      Colors.black.withValues(alpha: 0.5),
                     ],
                   ),
                 ),
@@ -127,7 +127,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     width: 1.5,
                   ),
                   boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 10)],
@@ -151,7 +151,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               child: Container(
                 height: 65,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(40),
                 ),
                 child: Row(

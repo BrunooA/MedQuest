@@ -183,9 +183,9 @@ class _CheckinScreenState extends State<CheckinScreen> {
               height: 55,
               child: ElevatedButton(
                 onPressed: () {
-                  print('Humor: $humorSelecionado');
-                  print('Sintomas: $sintomasSelecionados');
-                  print('Detalhes: ${detalhesController.text}');
+                  debugPrint('Humor: $humorSelecionado');
+                  debugPrint('Sintomas: $sintomasSelecionados');
+                  debugPrint('Detalhes: ${detalhesController.text}');
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -212,7 +212,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(blurRadius: 5, color: Colors.black.withOpacity(0.05)),
+          BoxShadow(blurRadius: 5, color: Colors.black.withValues(alpha: 0.05)),
         ],
       ),
       child: child,

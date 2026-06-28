@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 // Dados baseados no seu protótipo do Figma
 final Map<String, List<String>> dadosMedicosPorEspecialidade = {
   "Cardiologia": ["Dr. Carlos Lima"],
@@ -18,8 +16,17 @@ List<Map<String, dynamic>> listaConsultasCadastradas = [
     "especialidade": "Clínico Geral",
     "data": "Hoje • 14:30",
     "local": "Online",
-    "status": "Agendada",
-    "cor": Colors.orange,
+    "status": "Agendado", // Padronizado para bater com o _getStatusColor
     "tipoAtendimento": "Vídeo",
+    "motivo": "Estou com dores de cabeça frequentes há 3 dias...", // Adicionado para o modal do Figma
+  },
+  {
+    "nome": "Dr. Carlos Lima",
+    "especialidade": "Cardiologia",
+    "data": "05/03/2026 • 16:00",
+    "local": "Presencial",
+    "status": "Cancelada", // Ativa o botão "Reagendar" automaticamente no modal
+    "tipoAtendimento": "Presencial",
+    "motivo": "Check-up anual de rotina do coração.",
   },
 ];

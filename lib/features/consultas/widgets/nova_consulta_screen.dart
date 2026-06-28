@@ -112,7 +112,7 @@ class _NovaConsultaScreenState extends State<NovaConsultaScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: tipoAtendimento == val
-              ? const Color(0xFF3498DB).withOpacity(0.1)
+              ? const Color(0xFF3498DB).withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(

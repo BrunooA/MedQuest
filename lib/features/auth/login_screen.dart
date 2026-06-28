@@ -67,7 +67,7 @@ class LoginScreen extends StatelessWidget {
                   image: const AssetImage('assets/images/login.jpg'),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                    Colors.blue.withOpacity(0.5),
+                    Colors.blue.withValues(alpha: 0.5),
                     BlendMode.srcATop,
                   ),
                 ),

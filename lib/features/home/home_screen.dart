@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // Definimos as páginas que serão exibidas em cada aba
-    final List<Widget> _pages = [
+    final List<Widget> pages = [
       HomeContent(onAgendarClick: () => _mudarPagina(1)), // Conteúdo da Home
       const ConsultasExamesScreen(), // Tela de Exames
       ChatScreen(onBackToHome: () => _mudarPagina(0)), // Tela de Chat
@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         // IndexedStack mantém o estado das páginas ao trocar de aba
         index: _currentIndex,
-        children: _pages,
+        children: pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -210,7 +210,7 @@ class _HomeContentState extends State<HomeContent> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00f2fe).withOpacity(0.3),
+            color: const Color(0xFF00f2fe).withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

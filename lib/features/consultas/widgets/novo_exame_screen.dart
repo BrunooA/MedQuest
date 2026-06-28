@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../core/theme/colors.dart'; // Importando suas cores centralizadas
+import '../../../core/theme/colors.dart'; 
 import 'dados_temporarios.dart';
 
 class NovoExameScreen extends StatefulWidget {
@@ -12,11 +12,13 @@ class NovoExameScreen extends StatefulWidget {
 
 class _NovoExameScreenState extends State<NovoExameScreen> {
   String? exameSelecionado;
+  String? especialidadeSelecionada;
+  String? horarioSelecionado;
+  
   final TextEditingController _medicoController = TextEditingController();
   final TextEditingController _obsController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
-  // Função para abrir o menu de seleção de arquivo (IGUAL AO SEU PROTÓTIPO)
   void _mostrarOpcoesUpload() {
     showModalBottomSheet(
       context: context,
@@ -64,6 +66,10 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
         Navigator.pop(context);
         if (source != null) {
           final XFile? image = await _picker.pickImage(source: source);
+          
+          // CORREÇÃO AQUI: Verifica se o widget ainda está montado na árvore antes de usar o BuildContext
+          if (!mounted) return;
+
           if (image != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Arquivo selecionado: ${image.name}")),
@@ -88,10 +94,23 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
   @override
   Widget build(BuildContext context) {
     final List<String> opcoesExames = [
-      'Cardiologia',
+      'Hemograma Completo',
+      'Glicose em Jejum',
+      'Colesterol Total e Frações',
+      'Eletrocardiograma',
+    ];
+
+    final List<String> opcoesEspecialidades = [
+      'Cardiologista',
       'Clínico Geral',
       'Dermatologia',
-      'Exame de Sangue',
+    ];
+
+    final List<String> horariosDisponiveis = [
+      'Segunda-feira às 09:00',
+      'Terça-feira às 14:30',
+      'Quarta-feira às 10:15',
+      'Sexta-feira às 16:00',
     ];
 
     return Scaffold(
@@ -113,16 +132,28 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
           children: [
             const Text("Nome do Exame", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
             const SizedBox(height: 8),
-            _buildDropdown(opcoesExames),
+            _buildDropdown("Selecione o Exame", exameSelecionado, opcoesExames, (val) {
+              setState(() => exameSelecionado = val);
+            }),
 
             const SizedBox(height: 20),
             const Text("Nome do Médico", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
             const SizedBox(height: 8),
             _buildTextField(_medicoController, "Ex: Dra. Anna"),
 
-            const SizedBox(height: 20),
-            const Text("Documento (Opcional)", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
+            const SizedBox(height: 15),
+            _buildDropdown("Selecione a Especialidade", especialidadeSelecionada, opcoesEspecialidades, (val) {
+              setState(() => especialidadeSelecionada = val);
+            }),
+
+            const SizedBox(height: 15),
+            const Text("Horário Disponível", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
             const SizedBox(height: 8),
+            _buildDropdown("Escolha um horário disponível", horarioSelecionado, horariosDisponiveis, (val) {
+              setState(() => horarioSelecionado = val);
+            }),
+
+            const SizedBox(height: 25),
             _buildCaixaUpload(),
 
             const SizedBox(height: 20),
@@ -138,7 +169,7 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
     );
   }
 
-  Widget _buildDropdown(List<String> opcoes) {
+  Widget _buildDropdown(String hint, String? value, List<String> opcoes, ValueChanged<String?> onChanged) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -149,10 +180,10 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           isExpanded: true,
-          hint: const Text("Selecione a especialidade"),
-          value: exameSelecionado,
+          hint: Text(hint),
+          value: value,
           items: opcoes.map((String v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
-          onChanged: (val) => setState(() => exameSelecionado = val),
+          onChanged: onChanged,
         ),
       ),
     );
@@ -183,7 +214,7 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
       onTap: _mostrarOpcoesUpload,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 30),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           color: const Color(0xFFF0F2F5),
           borderRadius: BorderRadius.circular(10),
@@ -191,9 +222,15 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
         ),
         child: Column(
           children: [
-            Icon(Icons.add_circle_outline, color: AppColors.primaryBlue, size: 35),
-            const SizedBox(height: 10),
-            const Text("Adicionar arquivo", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add, color: AppColors.primaryBlue, size: 22),
+                const SizedBox(width: 8),
+                const Text("Adicionar arquivo", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 15)),
+              ],
+            ),
+            const SizedBox(height: 5),
             const Text("Formatos aceitos: JPG, PNG, PDF", style: TextStyle(color: Colors.grey, fontSize: 11)),
           ],
         ),
@@ -212,15 +249,19 @@ class _NovoExameScreenState extends State<NovoExameScreen> {
           elevation: 0,
         ),
         onPressed: () {
-          if (exameSelecionado != null) {
+          if (exameSelecionado != null && horarioSelecionado != null) {
             listaExamesCadastrados.add({
               'titulo': exameSelecionado!,
-              'data': 'Agendado: Hoje às 14:30',
+              'data': 'Agendado: $horarioSelecionado',
             });
             Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Por favor, preencha o Exame e selecione um Horário!")),
+            );
           }
         },
-        child: const Text("Confirmar Exame", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        child: const Text("Agendar", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
       ),
     );
   }

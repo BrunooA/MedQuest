@@ -44,6 +44,7 @@ class _LoadingScreenState extends State<LoadingScreen>
         timer.cancel();
 
         Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
           Navigator.pushReplacementNamed(context, '/home');
         });
       }
